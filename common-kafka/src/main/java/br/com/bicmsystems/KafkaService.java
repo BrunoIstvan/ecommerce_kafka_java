@@ -11,11 +11,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class KafkaService<T> implements Closeable {
 
     private final KafkaConsumer<String, T> consumer;
-    private final ConsumerFunction<T> parse;
+    private final ConsumerFunction parse;
 
     public KafkaService(KafkaConsumerData data, ConsumerFunction parse, Class<T> type, Map<String, String> properties) {
         this(parse, data.getGroupId(), type, properties);
@@ -36,7 +37,13 @@ public class KafkaService<T> implements Closeable {
             if (!records.isEmpty()) {
                 System.out.println("-----------------------------------------------");
                 System.out.println("Found " + records.count() + " register(s)");
-                records.forEach(this.parse::consume);
+                for(var record: records) {
+                    try {
+                        this.parse.consume(record);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
         }
     }

@@ -1,8 +1,11 @@
 import br.com.bicmsystems.KafkaConsumerData;
+import br.com.bicmsystems.KafkaDispatcher;
 import br.com.bicmsystems.KafkaService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 public class FraudDetectorServiceMain {
 
@@ -18,13 +21,12 @@ public class FraudDetectorServiceMain {
 
     }
 
-    private void parse(ConsumerRecord<String, Order> record) {
+    private void parse(ConsumerRecord<String, Order> record) throws ExecutionException, InterruptedException {
+
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking for fraud");
         System.out.println("key: " + record.key() +
-                " / value: { userId: " + record.value().getUserId() + " - " +
-                "orderId: " + record.value().getOrderId() + " - " +
-                "amount: " + record.value().getAmount() + "} " +
+                " / value: " + record.value() +
                 " / partition: " + record.partition() +
                 " / offset: " + record.offset());
         try {
@@ -33,7 +35,19 @@ public class FraudDetectorServiceMain {
             // ignoring
             e.printStackTrace();
         }
-        System.out.println("Order processed");
+        var order = record.value();
+        try(var orderDispatcher = new KafkaDispatcher<Order>()) {
+            if (isFraud(order)) {
+                System.out.println("Order is a fraud");
+                orderDispatcher.send("ECOMMERCE_ORDER_REJECTED", order.email(), order);
+            } else {
+                System.out.println("Order accepted: " + record.value());
+                orderDispatcher.send("ECOMMERCE_ORDER_APPROVED", order.email(), order);
+            }
+        }
     }
 
+    public Boolean isFraud(Order order) {
+        return order.amount().compareTo(BigDecimal.valueOf(4500L)) >= 0;
+    }
 }
