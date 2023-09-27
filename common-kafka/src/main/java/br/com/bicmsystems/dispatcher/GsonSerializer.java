@@ -1,5 +1,7 @@
-package br.com.bicmsystems;
+package br.com.bicmsystems.dispatcher;
 
+import br.com.bicmsystems.Message;
+import br.com.bicmsystems.MessageAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.kafka.common.serialization.Serializer;

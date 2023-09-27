@@ -1,5 +1,7 @@
 package br.com.bicmsystems;
 
+import br.com.bicmsystems.dispatcher.KafkaDispatcher;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -18,15 +20,13 @@ public class NewOrderMain {
                     var orderId = UUID.randomUUID().toString();
                     var amount = BigDecimal.valueOf(Math.random() * 5000 + 1);
                     var order = new Order(orderId, amount, email);
-                    orderDispatcher.send("ECOMMERCE_NEW_ORDER",
-                            new CorrelationId(NewOrderMain.class.getSimpleName()),
-                            email, order);
+                    var id = new CorrelationId(NewOrderMain.class.getSimpleName());
+
+                    orderDispatcher.send("ECOMMERCE_NEW_ORDER", id, email, order);
 
                     var emailText = new Email("Reporting status",
                             "Olá " + email + ", Thank you for your order! We are processing your order!");
-                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
-                            new CorrelationId(NewOrderMain.class.getSimpleName()),
-                            email, emailText);
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", id, email, emailText);
 
                 }
 

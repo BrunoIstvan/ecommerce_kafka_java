@@ -1,5 +1,8 @@
 package br.com.bicmsystems;
 
+import br.com.bicmsystems.consumer.KafkaConsumerData;
+import br.com.bicmsystems.consumer.KafkaService;
+import br.com.bicmsystems.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;

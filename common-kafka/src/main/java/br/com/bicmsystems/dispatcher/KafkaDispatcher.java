@@ -1,5 +1,7 @@
-package br.com.bicmsystems;
+package br.com.bicmsystems.dispatcher;
 
+import br.com.bicmsystems.CorrelationId;
+import br.com.bicmsystems.Message;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -12,7 +14,7 @@ public class KafkaDispatcher<T> implements Closeable {
 
     private final KafkaProducer<String, Message<T>> producer;
 
-    KafkaDispatcher() {
+    public KafkaDispatcher() {
         this.producer = new KafkaProducer<>(properties());
     }
 
@@ -23,7 +25,7 @@ public class KafkaDispatcher<T> implements Closeable {
     }
 
     Future<RecordMetadata> sendAsync(String topic, CorrelationId id, String key, T payload) {
-        var value = new Message<>(id, payload);
+        var value = new Message<>(id.continueWith("_" + topic), payload);
 
         var record = new ProducerRecord<>(topic, key, value);
 

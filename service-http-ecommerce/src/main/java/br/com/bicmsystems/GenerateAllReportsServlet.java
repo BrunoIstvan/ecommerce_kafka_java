@@ -1,15 +1,12 @@
 package br.com.bicmsystems;
 
-import jakarta.servlet.Servlet;
+import br.com.bicmsystems.dispatcher.KafkaDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.eclipse.jetty.servlet.Source;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class GenerateAllReportsServlet extends HttpServlet {

@@ -1,5 +1,6 @@
 package br.com.bicmsystems;
 
+import br.com.bicmsystems.dispatcher.KafkaDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,18 +30,15 @@ public class NewOrderServlet extends HttpServlet {
 
             var email = req.getParameter("email");
             var amount = new BigDecimal(req.getParameter("amout"));
-
             var orderId = UUID.randomUUID().toString();
             var order = new Order(orderId, amount, email);
-            orderDispatcher.send("ECOMMERCE_NEW_ORDER",
-                    new CorrelationId(NewOrderServlet.class.getSimpleName()),
-                    email, order);
+            var id = new CorrelationId(NewOrderServlet.class.getSimpleName());
+
+            orderDispatcher.send("ECOMMERCE_NEW_ORDER", id, email, order);
 
             var emailText = new Email("Reporting status",
                     "Olá " + email + ", Thank you for your order! We are processing your order!");
-            emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
-                    new CorrelationId(NewOrderServlet.class.getSimpleName()),
-                    email, emailText);
+            emailDispatcher.send("ECOMMERCE_SEND_EMAIL", id, email, emailText);
 
             System.out.println("New Order sent successfully.");
 

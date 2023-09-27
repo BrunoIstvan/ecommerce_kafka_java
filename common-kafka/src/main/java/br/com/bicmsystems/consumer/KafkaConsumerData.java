@@ -1,4 +1,4 @@
-package br.com.bicmsystems;
+package br.com.bicmsystems.consumer;
 
 import java.util.regex.Pattern;
 

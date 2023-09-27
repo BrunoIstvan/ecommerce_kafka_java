@@ -1,6 +1,9 @@
-package br.com.bicmsystems;
+package br.com.bicmsystems.consumer;
 
 
+import br.com.bicmsystems.Message;
+import br.com.bicmsystems.dispatcher.GsonSerializer;
+import br.com.bicmsystems.dispatcher.KafkaDispatcher;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
