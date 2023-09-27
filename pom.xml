@@ -12,10 +12,11 @@
         <module>service-email</module>
         <module>service-fraud-detector</module>
         <module>service-log</module>
-        <module>service-new-order</module>
+        <module>service-new-user</module>
         <module>common-kafka</module>
         <module>service-users</module>
         <module>service-http-ecommerce</module>
+        <module>service-reading-report</module>
     </modules>
 
     <properties>

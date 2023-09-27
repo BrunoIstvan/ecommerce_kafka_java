@@ -1,5 +1,5 @@
-import br.com.bicmsystems.KafkaConsumerData;
-import br.com.bicmsystems.KafkaService;
+package br.com.bicmsystems;
+
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.sql.Connection;
@@ -7,13 +7,14 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class CreateUserServiceMain {
 
     private final Connection connection;
 
     CreateUserServiceMain() throws SQLException {
-        String url = "jdbc:sqlite:target/users_database.db";
+        String url = "jdbc:sqlite:users_database.db";
         this.connection = DriverManager.getConnection(url);
         try {
             this.connection.createStatement()
@@ -23,19 +24,19 @@ public class CreateUserServiceMain {
         }
     }
 
-    public static void main(String[] args) throws SQLException {
+    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
         var createUserService = new CreateUserServiceMain();
         var groupId = CreateUserServiceMain.class.getSimpleName();
         var data = new KafkaConsumerData(groupId, "ECOMMERCE_NEW_ORDER", null);
 
-        try(var service = new KafkaService<>(data, createUserService::parse, Order.class, Map.of())) {
+        try(var service = new KafkaService<>(data, createUserService::parse, Map.of())) {
             service.run();
         }
     }
 
-    private void parse(ConsumerRecord<String, Order> record) throws SQLException {
+    private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
 
-        var order = record.value();
+        var order = record.value().getPayload();
         System.out.println("------------------------------------------");
         System.out.println("Processing new order, checking for new user");
         System.out.println("value: " + order);
@@ -52,7 +53,7 @@ public class CreateUserServiceMain {
         insert.setString(1, uuid);
         insert.setString(2, email);
         insert.execute();
-        System.out.println("Added user uuid e " + email);
+        System.out.println("Added user uuid " + uuid + " - e-mail: " + email);
     }
 
     private boolean isNewUser(String email) throws SQLException {

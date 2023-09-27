@@ -18,11 +18,15 @@ public class NewOrderMain {
                     var orderId = UUID.randomUUID().toString();
                     var amount = BigDecimal.valueOf(Math.random() * 5000 + 1);
                     var order = new Order(orderId, amount, email);
-                    orderDispatcher.send("ECOMMERCE_NEW_ORDER", email, order);
+                    orderDispatcher.send("ECOMMERCE_NEW_ORDER",
+                            new CorrelationId(NewOrderMain.class.getSimpleName()),
+                            email, order);
 
                     var emailText = new Email("Reporting status",
                             "Olá " + email + ", Thank you for your order! We are processing your order!");
-                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", email, emailText);
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL",
+                            new CorrelationId(NewOrderMain.class.getSimpleName()),
+                            email, emailText);
 
                 }
 
