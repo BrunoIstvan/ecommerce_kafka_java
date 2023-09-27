@@ -12,7 +12,6 @@
         <module>service-email</module>
         <module>service-fraud-detector</module>
         <module>service-log</module>
-        <module>service-new-user</module>
         <module>common-kafka</module>
         <module>service-users</module>
         <module>service-http-ecommerce</module>
