@@ -1,14 +1,6 @@
 package br.com.bicmsystems;
 
-public class Message<T> {
-
-    private final CorrelationId id;
-    private final T payload;
-
-    public Message(CorrelationId id, T payload) {
-        this.id = id;
-        this.payload = payload;
-    }
+public record Message<T>(CorrelationId id, T payload) {
 
     @Override
     public String toString() {
@@ -16,13 +8,5 @@ public class Message<T> {
                 "id=" + id +
                 ", payload=" + payload +
                 '}';
-    }
-
-    public CorrelationId getId() {
-        return id;
-    }
-
-    public T getPayload() {
-        return this.payload;
     }
 }

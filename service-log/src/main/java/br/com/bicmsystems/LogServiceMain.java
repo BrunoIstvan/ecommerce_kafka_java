@@ -16,7 +16,7 @@ public class LogServiceMain {
 
         var logService = new LogServiceMain();
         var groupId = LogServiceMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId, null, Pattern.compile("ECOMMERCE.*"));
+        var data = KafkaConsumerData.pattern(groupId, Pattern.compile("ECOMMERCE.*"));
 
         try(var service = new KafkaService<>(
                             data, logService::parse,

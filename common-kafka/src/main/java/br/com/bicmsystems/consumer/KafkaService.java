@@ -48,8 +48,8 @@ public class KafkaService<T> implements Closeable {
                             var message = record.value();
                             e.printStackTrace();
                             dispatcherDeadLetter.send("ECOMMERCE_DEADLETTER",
-                                    message.getId().continueWith("DeadLetter"),
-                                    message.getId().toString(),
+                                    message.id().continueWith("DeadLetter"),
+                                    message.id().toString(),
                                     new GsonSerializer<>().serialize("", message));
                         }
                     }

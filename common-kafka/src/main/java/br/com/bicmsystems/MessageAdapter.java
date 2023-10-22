@@ -8,9 +8,9 @@ public class MessageAdapter implements JsonSerializer<Message>, JsonDeserializer
     @Override
     public JsonElement serialize(Message message, Type type, JsonSerializationContext context) {
         var json = new JsonObject();
-        json.addProperty("type", message.getPayload().getClass().getName());
-        json.add("correlationId", context.serialize(message.getId()));
-        json.add("payload", context.serialize(message.getPayload()));
+        json.addProperty("type", message.payload().getClass().getName());
+        json.add("correlationId", context.serialize(message.id()));
+        json.add("payload", context.serialize(message.payload()));
         return json;
     }
 

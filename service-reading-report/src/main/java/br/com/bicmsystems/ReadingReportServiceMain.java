@@ -18,7 +18,7 @@ public class ReadingReportServiceMain {
 
         var reportService = new ReadingReportServiceMain();
         var groupId = ReadingReportServiceMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId, "ECOMMERCE_USER_GENERATE_READING_REPORT", null);
+        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_USER_GENERATE_READING_REPORT");
 
         try(var service = new KafkaService<>(data, reportService::parse, Map.of())) {
             service.run();
@@ -30,7 +30,7 @@ public class ReadingReportServiceMain {
 
         System.out.println("------------------------------------------");
         var message = record.value();
-        var user = message.getPayload();
+        var user = message.payload();
         System.out.println("Processing report for " + user.uuid());
         var target = new File(user.getReportPath());
         IO.copyTo(SOURCE, target);

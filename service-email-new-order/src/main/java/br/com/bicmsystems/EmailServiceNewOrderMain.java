@@ -14,7 +14,7 @@ public class EmailServiceNewOrderMain {
 
         var emailService = new EmailServiceNewOrderMain();
         var groupId = EmailServiceNewOrderMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId, "ECOMMERCE_NEW_ORDER", null);
+        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_NEW_ORDER");
 
         try(var service = new KafkaService<>(data, emailService::parse, Map.of())) {
             service.run();
@@ -32,8 +32,8 @@ public class EmailServiceNewOrderMain {
                 " / offset: " + record.offset());
 
         var message = record.value();
-        var order = message.getPayload();
-        var id = message.getId().continueWith(EmailServiceNewOrderMain.class.getSimpleName());
+        var order = message.payload();
+        var id = message.id().continueWith(EmailServiceNewOrderMain.class.getSimpleName());
         try(var emailDispatcher = new KafkaDispatcher<Email>()) {
             var emailText = new Email("Reporting status",
                                         "Olá " + order.email() +

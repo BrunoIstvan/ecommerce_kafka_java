@@ -1,7 +1,5 @@
 package br.com.bicmsystems;
 
-import java.math.BigDecimal;
-
 public record User(String uuid) {
 
     @Override

@@ -14,12 +14,6 @@ public class GenerateAllReportsServlet extends HttpServlet {
     private final KafkaDispatcher<String> batchDispatcher = new KafkaDispatcher<>();
 
     @Override
-    public void destroy() {
-        super.destroy();
-        batchDispatcher.close();
-    }
-
-    @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         try {
@@ -37,6 +31,12 @@ public class GenerateAllReportsServlet extends HttpServlet {
         } catch (ExecutionException | InterruptedException ex) {
             throw new ServletException(ex);
         }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        batchDispatcher.close();
     }
 
 }

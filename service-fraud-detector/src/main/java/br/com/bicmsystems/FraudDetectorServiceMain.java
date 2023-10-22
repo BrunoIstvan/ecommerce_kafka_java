@@ -15,7 +15,7 @@ public class FraudDetectorServiceMain {
 
         var fraudService = new FraudDetectorServiceMain();
         var groupId = FraudDetectorServiceMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId, "ECOMMERCE_NEW_ORDER", null);
+        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_NEW_ORDER");
 
         try(var service = new KafkaService<>(data, fraudService::parse, Map.of())) {
             service.run();
@@ -38,17 +38,17 @@ public class FraudDetectorServiceMain {
             e.printStackTrace();
         }
         var message = record.value();
-        var order = message.getPayload();
+        var order = message.payload();
         try(var orderDispatcher = new KafkaDispatcher<Order>()) {
             if (isFraud(order)) {
                 System.out.println("Order is a fraud");
                 orderDispatcher.send("ECOMMERCE_ORDER_REJECTED",
-                        message.getId().continueWith(FraudDetectorServiceMain.class.getSimpleName()),
+                        message.id().continueWith(FraudDetectorServiceMain.class.getSimpleName()),
                         order.email(), order);
             } else {
                 System.out.println("Order accepted: " + record.value());
                 orderDispatcher.send("ECOMMERCE_ORDER_APPROVED",
-                        message.getId().continueWith(FraudDetectorServiceMain.class.getSimpleName()),
+                        message.id().continueWith(FraudDetectorServiceMain.class.getSimpleName()),
                         order.email(), order);
             }
         }

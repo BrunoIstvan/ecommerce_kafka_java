@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 public class GsonSerializer<T> implements Serializer<T> {
 
     private final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(Message.class, new MessageAdapter())
+            .registerTypeAdapter(Message.class, new MessageAdapter<Message>())
             .create();
 
     @Override

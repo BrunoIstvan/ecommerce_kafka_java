@@ -7,10 +7,18 @@ public class KafkaConsumerData {
     private final String topic;
     private final Pattern pattern;
 
-    public KafkaConsumerData(String groupId, String topic, Pattern pattern) {
+    private KafkaConsumerData(String groupId, String topic, Pattern pattern) {
         this.groupId = groupId;
         this.topic = topic;
         this.pattern = pattern;
+    }
+
+    public static KafkaConsumerData topic(String groupId, String topic) {
+        return new KafkaConsumerData(groupId, topic, null);
+    }
+
+    public static KafkaConsumerData pattern(String groupId, Pattern pattern) {
+        return new KafkaConsumerData(groupId, null, pattern);
     }
 
     public String getGroupId() {

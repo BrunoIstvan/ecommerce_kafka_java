@@ -14,7 +14,7 @@ public class EmailServiceMain {
 
         var emailService = new EmailServiceMain();
         var groupId = EmailServiceMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId,"ECOMMERCE_SEND_EMAIL", null);
+        var data = KafkaConsumerData.topic(groupId,"ECOMMERCE_SEND_EMAIL");
         try(var kafkaService = new KafkaService<>(data, emailService::parse, Map.of())) {
             kafkaService.run();
         }
@@ -23,9 +23,9 @@ public class EmailServiceMain {
 
     private void parse(ConsumerRecord<String, Message<Email>> record)  {
         System.out.println("Send email: ");
-        var email = record.value().getPayload();
+        var email = record.value().payload();
         System.out.println("key: " + record.key() +
-                " / value: { subject: " + email.getSubject() + " - body: " + email.getBody() + " } " +
+                " / value: { subject: " + email.subject() + " - body: " + email.body() + " } " +
                 " / partition: " + record.partition() +
                 " / offset: " + record.offset());
         try {

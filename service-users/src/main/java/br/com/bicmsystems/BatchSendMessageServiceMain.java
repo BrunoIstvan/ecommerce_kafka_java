@@ -33,7 +33,7 @@ public class BatchSendMessageServiceMain {
     public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
         var batchService = new BatchSendMessageServiceMain();
         var groupId = BatchSendMessageServiceMain.class.getSimpleName();
-        var data = new KafkaConsumerData(groupId, "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS", null);
+        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_SEND_MESSAGE_TO_ALL_USERS");
 
         try(var service = new KafkaService<>(data, batchService::parse, Map.of())) {
             service.run();
@@ -45,15 +45,15 @@ public class BatchSendMessageServiceMain {
         var message = record.value();
         System.out.println("------------------------------------------");
         System.out.println("Processing new batch");
-        System.out.println("Topic: " + message.getPayload());
+        System.out.println("Topic: " + message.payload());
 
         // aqui é possível simular um erro que irá fazer uma mensagem ser enviada para o tópico ECOMMERCE_DEADLETTER
         // if(true) throw new RuntimeException("Erro forçado para testar DEADLETTER_QUEUE");
 
         for (User user: getAllUsers()) {
             userDispatcher.sendAsync(
-                    message.getPayload(),
-                    message.getId().continueWith(BatchSendMessageServiceMain.class.getSimpleName()),
+                    message.payload(),
+                    message.id().continueWith(BatchSendMessageServiceMain.class.getSimpleName()),
                     user.uuid(),
                     user);
 
