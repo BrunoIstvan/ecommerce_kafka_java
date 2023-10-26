@@ -1,32 +1,26 @@
 package br.com.bicmsystems;
 
-import br.com.bicmsystems.consumer.KafkaConsumerData;
-import br.com.bicmsystems.consumer.KafkaService;
+import br.com.bicmsystems.consumer.ConsumerService;
+import br.com.bicmsystems.consumer.ServiceRunner;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-public class ReadingReportServiceMain {
+public class ReadingReportServiceMain implements ConsumerService<User> {
+
+    private static final int THREADS = 5;
 
     private static final Path SOURCE = new File("src/main/resources/report.txt").toPath();
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args) {
 
-        var reportService = new ReadingReportServiceMain();
-        var groupId = ReadingReportServiceMain.class.getSimpleName();
-        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_USER_GENERATE_READING_REPORT");
-
-        try(var service = new KafkaService<>(data, reportService::parse, Map.of())) {
-            service.run();
-        }
+        new ServiceRunner<>(ReadingReportServiceMain::new).start(THREADS);
 
     }
 
-    private void parse(ConsumerRecord<String, Message<User>> record) throws IOException {
+    @Override
+    public void parse(ConsumerRecord<String, Message<User>> record) throws Exception {
 
         System.out.println("------------------------------------------");
         var message = record.value();
@@ -38,6 +32,16 @@ public class ReadingReportServiceMain {
 
         System.out.println("File created: " + target.getAbsolutePath());
 
+    }
+
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_USER_GENERATE_READING_REPORT";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return ReadingReportServiceMain.class.getSimpleName();
     }
 
 }

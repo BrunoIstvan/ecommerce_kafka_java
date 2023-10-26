@@ -1,42 +1,28 @@
 package br.com.bicmsystems;
 
-import br.com.bicmsystems.consumer.KafkaConsumerData;
-import br.com.bicmsystems.consumer.KafkaService;
+import br.com.bicmsystems.consumer.ConsumerService;
+import br.com.bicmsystems.consumer.ServiceRunner;
+import br.com.bicmsystems.ecommerce.database.LocalDatabase;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
-public class CreateUserServiceMain {
+public class CreateUserServiceMain implements ConsumerService<Order> {
 
-    private final Connection connection;
+    private final LocalDatabase database;
 
     CreateUserServiceMain() throws SQLException {
-        String url = "jdbc:sqlite:users_database.db";
-        this.connection = DriverManager.getConnection(url);
-        try {
-            this.connection.createStatement()
-                    .execute("create table Users (uuid varchar(200) primary key, email varchar(200))");
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
+        this.database = new LocalDatabase("users_database");
+        this.database.createIfNotExists("create table Users (uuid varchar(200) primary key, email varchar(200))");
     }
 
-    public static void main(String[] args) throws SQLException, ExecutionException, InterruptedException {
-        var createUserService = new CreateUserServiceMain();
-        var groupId = CreateUserServiceMain.class.getSimpleName();
-        var data = KafkaConsumerData.topic(groupId, "ECOMMERCE_NEW_ORDER");
-
-        try(var service = new KafkaService<>(data, createUserService::parse, Map.of())) {
-            service.run();
-        }
+    public static void main(String[] args) {
+        new ServiceRunner<>(CreateUserServiceMain::new).start(1);
     }
 
-    private void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
+    @Override
+    public void parse(ConsumerRecord<String, Message<Order>> record) throws SQLException {
 
         var order = record.value().payload();
         System.out.println("------------------------------------------");
@@ -50,20 +36,24 @@ public class CreateUserServiceMain {
 
     }
 
+    @Override
+    public String getTopic() {
+        return "ECOMMERCE_NEW_ORDER";
+    }
+
+    @Override
+    public String getConsumerGroup() {
+        return CreateUserServiceMain.class.getSimpleName();
+    }
+
     private void insertNewUser(String uuid, String email) throws SQLException {
-        var insert = this.connection.prepareStatement("insert into Users (uuid, email) values (?, ?)");
-        insert.setString(1, uuid);
-        insert.setString(2, email);
-        insert.execute();
+        this.database.update("insert into Users (uuid, email) values (?, ?)", uuid, email);
         System.out.println("Added user uuid " + uuid + " - e-mail: " + email);
     }
 
     private boolean isNewUser(String email) throws SQLException {
-        var exists = this.connection.prepareStatement("select uuid from Users where email = ? limit 1");
-        exists.setString(1, email);
-        var results = exists.executeQuery();
+        var results = this.database.query("select uuid from Users where email = ? limit 1", email);
         return !results.next();
     }
-
 
 }
